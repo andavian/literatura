@@ -13,7 +13,7 @@ import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
+
 
 @Service
 public class LibroService {
@@ -29,11 +29,11 @@ public class LibroService {
 
 
 
-    public LibroDTO obtenerPorId(Long id) {
-        return libroRepository.findById(id)
-                .map(this::convertirADTO)
-                .orElseThrow(() -> new RuntimeException("Libro no encontrado"));
-    }
+//    public LibroDTO obtenerPorId(Long id) {
+//        return libroRepository.findById(id)
+//                .map(this::convertirADTO)
+//                .orElseThrow(() -> new RuntimeException("Libro no encontrado"));
+//    }
 
     public Libro guardarLibro(LibroDTO libroDTO) {
         Libro libro = new Libro();
@@ -43,7 +43,7 @@ public class LibroService {
 
         List<Autor> autores = libroDTO.autores().stream()
                 .map(this::obtenerOcrearAutor)
-                .collect(Collectors.toList());
+                .toList();
 
         libro.setAutores(new HashSet<>(autores));
         return libroRepository.save(libro);
@@ -60,27 +60,27 @@ public class LibroService {
                 });
     }
 
-    private List<LibroDTO> convierteDatos(List<Libro> libros) {
-        return libros.stream()
-                .map(this::convertirADTO)
-                .collect(Collectors.toList());
-    }
+//    private List<LibroDTO> convierteDatos(List<Libro> libros) {
+//        return libros.stream()
+//                .map(this::convertirADTO)
+//                .collect(Collectors.toList());
+//    }
 
-    private LibroDTO convertirADTO(Libro libro) {
-        List<AutorDTO> autores = libro.getAutores().stream()
-                .map(autor -> new AutorDTO(
-                        autor.getNombre(),
-                        autor.getBirthYear(),
-                        autor.getDeathYear()))
-                .collect(Collectors.toList());
-
-        return new LibroDTO(
-                libro.getTitulo(),
-                libro.getIdioma(),
-                libro.getCantidadDescargas(),
-                autores
-        );
-    }
+//    private LibroDTO convertirADTO(Libro libro) {
+//        List<AutorDTO> autores = libro.getAutores().stream()
+//                .map(autor -> new AutorDTO(
+//                        autor.getNombre(),
+//                        autor.getBirthYear(),
+//                        autor.getDeathYear()))
+//                .collect(Collectors.toList());
+//
+//        return new LibroDTO(
+//                libro.getTitulo(),
+//                libro.getIdioma(),
+//                libro.getCantidadDescargas(),
+//                autores
+//        );
+//    }
 
     public void mostrarLibrosBuscados() {
         List<Libro> libros = libroRepository.findAll();
@@ -98,5 +98,25 @@ public class LibroService {
                 .sorted(Comparator.comparing(Autor::getNombre))
                 .forEach(System.out::println);
 
+    }
+
+        public List<Autor> listAuthorsAliveInYear(int year) {
+        return autorRepository.listAuthorsAliveInYear(year);
+    }
+
+    public List<Libro> findBooksByLanguage(String idioma) {
+        return libroRepository.findByIdiomaIgnoreCase(idioma);
+    }
+
+    public List<Libro> obtenerTop10LibrosDescargados() {
+        return libroRepository.findTop10LibrosDescargados();
+    }
+
+    public List<Autor> buscarAutoresPorNombre(String nombre) {
+        return autorRepository.findByNameContainingIgnoreCase(nombre);
+    }
+
+    public List<Autor> buscarAutoresPorFechaDeNacimiento(int birthYear) {
+        return autorRepository.findByBirthYear(birthYear);
     }
 }
